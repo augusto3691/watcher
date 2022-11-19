@@ -10,4 +10,9 @@ export class AppController {
   async getScrapper(@Query() query): Promise<CardData[]> {
     return await this.appService.getScrapper(query);
   }
+
+  @Get('health')
+  getHealth(): string {
+    return 'OK';
+  }
 }
