@@ -1,9 +1,9 @@
 {
-  "name": "liga-magic-scrapper",
+  "name": "watcher",
   "version": "0.0.1",
-  "description": "",
-  "author": "",
-  "private": true,
+  "description": "Devido a falta de uma API para consultar preços em R$(Real Brasileiro) de cartas de mágic, esse projeto tem como fim utilizar puppeteer para fazer um scrapping no site da liga magic e retornar os preços das cartas em R$",
+  "author": "Augusto Coelho Henriques",
+  "private": false,
   "license": "UNLICENSED",
   "scripts": {
     "prebuild": "rimraf dist",
