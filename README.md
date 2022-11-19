@@ -13,31 +13,33 @@
 
 <i>Art by: <a href="https://www.deviantart.com/gido">Gido</a></i>
 
-## Install
+## Instalar
 
 ```sh
 yarn install
 ```
 
-## Usage
+## Usar
 
-```sh
+```js
 yarn run start
-```
+// depois, se você não mudou a porta no env, é só fazer um GET para localhost:8080?q=nome_da_carta
+```	
 
-## Run tests
+
+## Testes
 
 ```sh
 yarn run test
 ```
 
-## Author
+## Autor
 
 👤 **Augusto Coelho Henriques**
 
 - Github: [@augusto3691](https://github.com/augusto3691)
 - LinkedIn: [@https:\/\/www.linkedin.com\/in\/augustohenriques\/](https://linkedin.com/in/https://www.linkedin.com/in/augustohenriques/)
 
-## Show your support
+## Apoie
 
-Se curtiu da uma ⭐️
+Se curtiu da uma ⭐️, PRs são bem vindos!
