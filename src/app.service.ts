@@ -39,7 +39,10 @@ export class AppService {
         'i',
       );
       var setInfo = JSON.parse('[' + body.match(regexSetInfo)[1] + ']');
+      
+      Logger.log(avgprice);
 
+      //TODO: scrap extras ids for better accuracy of users in search for prices
       cardData.push({
         img: `//repositorio.sbrauble.com/arquivos/up/ed_mtg/${setInfo[3].toUpperCase()}_R.gif`,
         edition: $.parseHTML(setInfo[5]).values().next().value.data,
@@ -47,21 +50,21 @@ export class AppService {
           low: {
             priceNormal: avgprice[setInfo[7]].precoMenor,
             priceFoil:
-              avgprice[setInfo[7]].extras != undefined
+              avgprice[setInfo[7]].extras != undefined && avgprice[setInfo[7]].extras["2"]
                 ? avgprice[setInfo[7]].extras['2'].precoMenor
                 : 0,
           },
           med: {
             priceNormal: avgprice[setInfo[7]].precoMedio,
             priceFoil:
-              avgprice[setInfo[7]].extras != undefined
+              avgprice[setInfo[7]].extras != undefined && avgprice[setInfo[7]].extras["2"]
                 ? avgprice[setInfo[7]].extras['2'].precoMedio
                 : 0,
           },
           high: {
             priceNormal: avgprice[setInfo[7]].precoMaior,
             priceFoil:
-              avgprice[setInfo[7]].extras != undefined
+              avgprice[setInfo[7]].extras != undefined && avgprice[setInfo[7]].extras["2"]
                 ? avgprice[setInfo[7]].extras['2'].precoMaior
                 : 0,
           },
