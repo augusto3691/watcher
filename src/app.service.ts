@@ -1,117 +1,77 @@
-import { Injectable, Query } from '@nestjs/common';
+import { Injectable, Logger, NotFoundException, Query } from '@nestjs/common';
 import { CardData } from './interface/CardData';
-import puppeteer from 'puppeteer';
+import axios from 'axios';
+import * as cheerio from 'cheerio';
 
 @Injectable()
 export class AppService {
-  //TODO: Create a interface for the return type
   async getScrapper(@Query() query): Promise<CardData[]> {
-    const browser = await puppeteer.launch({ headless: true });
-    const page = await browser.newPage();
-    await page.goto(
-      `https://www.ligamagic.com.br?view=cards%2Fsearch&card=${query.q}`,
-    );
-    await page.waitForSelector('.edicoes');
-    const editions = await page.evaluate(async () => {
-      const results = Array.from(document.querySelectorAll('.edicoes li')).map(
-        (li) => {
-          return {
-            id: li.id,
-            img: li.querySelector('img').src,
-            edition: '',
-            price: {
-              low: {
-                priceNormal: 0,
-                priceFoil: 0,
-              },
-              med: {
-                priceNormal: 0,
-                priceFoil: 0,
-              },
-              high: {
-                priceNormal: 0,
-                priceFoil: 0,
-              },
-            },
-          };
-        },
-      );
+    Logger.log(`🗃️  Looking for card name: "${query.q}"`);
 
-      return results;
-    });
+    const url = `https://ligamagic.com.br/?view=cards/card&card=${query.q}`;
+    const { data: body } = await axios.get(url);
+    const cardData: CardData[] = [];
+    const $ = cheerio.load(body);
 
-    for await (const edition of editions) {
-      let editionIcon = await page.$(`#${edition.id}`);
-      await editionIcon.click();
-      await page.waitForSelector('#ed-nome a');
-
-      let editionText = await page.$eval(
-        '#ed-nome a',
-        (editionElement) => editionElement.textContent,
-      );
-
-      let editionLowPriceElement = await page.$$eval(
-        '.col-prc-menor',
-        (editionPriceElement) => {
-          return {
-            priceNormal: Number(
-              editionPriceElement[0].textContent
-                .replace(/[^0-9,-]+/g, '')
-                .replace(',', '.'),
-            ),
-            priceFoil: Number(
-              editionPriceElement[1].textContent
-                .replace(/[^0-9,-]+/g, '')
-                .replace(',', '.'),
-            ),
-          };
-        },
-      );
-      let editionMedPriceElement = await page.$$eval(
-        '.col-prc-medio',
-        (editionPriceElement) => {
-          return {
-            priceNormal: Number(
-              editionPriceElement[0].textContent
-                .replace(/[^0-9,-]+/g, '')
-                .replace(',', '.'),
-            ),
-            priceFoil: Number(
-              editionPriceElement[1].textContent
-                .replace(/[^0-9,-]+/g, '')
-                .replace(',', '.'),
-            ),
-          };
-        },
-      );
-      let editionHighPriceElement = await page.$$eval(
-        '.col-prc-maior',
-        (editionPriceElement) => {
-          return {
-            priceNormal: Number(
-              editionPriceElement[0].textContent
-                .replace(/[^0-9,-]+/g, '')
-                .replace(',', '.'),
-            ),
-            priceFoil: Number(
-              editionPriceElement[1].textContent
-                .replace(/[^0-9,-]+/g, '')
-                .replace(',', '.'),
-            ),
-          };
-        },
-      );
-
-      //add info to editions
-      edition.edition = editionText;
-      edition.price = {
-        low: editionLowPriceElement,
-        med: editionMedPriceElement,
-        high: editionHighPriceElement,
-      };
+    //Check for card
+    if (body.indexOf('vetPorEdicao') == -1) {
+      Logger.log(`😞  Card "${query.q}" not found`);
+      throw new NotFoundException(`Card *${query.q}* not found`);
     }
 
-    return editions;
+    //Check for price
+    if (body.indexOf('var g_avgprice') == -1) {
+      Logger.log(`💸  Price for card "${query.q}" not found`);
+      throw new NotFoundException(`Price for card *${query.q}* not found`);
+    }
+
+    //Scrap price vector
+    const extractRegex = /g_avgprice='.*?'/gm;
+    const pricesString = extractRegex.exec(body);
+    const avgprice = JSON.parse(
+      pricesString[0].substring(12, pricesString[0].length - 1),
+    );
+
+    //Scrap card versions and match with name
+    $('.card-image .edicoes li').each(function (i, elem) {
+      var regexSetInfo = new RegExp(
+        'vetPorEdicao\\[' + i.toString() + '\\]=\\[(.*?)\\];',
+        'i',
+      );
+      var setInfo = JSON.parse('[' + body.match(regexSetInfo)[1] + ']');
+
+      cardData.push({
+        img: `//repositorio.sbrauble.com/arquivos/up/ed_mtg/${setInfo[3].toUpperCase()}_R.gif`,
+        edition: $.parseHTML(setInfo[5]).values().next().value.data,
+        price: {
+          low: {
+            priceNormal: avgprice[setInfo[7]].precoMenor,
+            priceFoil:
+              avgprice[setInfo[7]].extras != undefined
+                ? avgprice[setInfo[7]].extras['2'].precoMenor
+                : 0,
+          },
+          med: {
+            priceNormal: avgprice[setInfo[7]].precoMedio,
+            priceFoil:
+              avgprice[setInfo[7]].extras != undefined
+                ? avgprice[setInfo[7]].extras['2'].precoMedio
+                : 0,
+          },
+          high: {
+            priceNormal: avgprice[setInfo[7]].precoMaior,
+            priceFoil:
+              avgprice[setInfo[7]].extras != undefined
+                ? avgprice[setInfo[7]].extras['2'].precoMaior
+                : 0,
+          },
+        },
+      });
+    });
+
+    Logger.log(`🧧  Card and price found: "${query.q}"`);
+
+    return cardData;
   }
 
   async timeout(ms) {

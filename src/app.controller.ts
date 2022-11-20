@@ -1,4 +1,4 @@
-import { Controller, Get, Query } from '@nestjs/common';
+import { BadRequestException, Controller, Get, Query } from '@nestjs/common';
 import { AppService } from './app.service';
 import { CardData } from './interface/CardData';
 
@@ -13,6 +13,6 @@ export class AppController {
 
   @Get('health')
   getHealth(): string {
-    return 'OK';
+    return 'I see you...';
   }
 }

@@ -1,7 +1,7 @@
 {
   "name": "watcher",
-  "version": "0.0.1",
-  "description": "Devido a falta de uma API para consultar preços em R$(Real Brasileiro) de cartas de mágic, esse projeto tem como fim utilizar puppeteer para fazer um scrapping no site da liga magic e retornar os preços das cartas em R$",
+  "version": "1.0.1",
+  "description": "Devido a falta de uma API para consultar preços em R$ (Real Brasileiro) de cartas de Magic The Gathering, esse projeto tem como fim utilizar um scrapping no site da liga magic e retornar os preços das cartas em R$ baseado no nome exato das cartas.",
   "author": "Augusto Coelho Henriques",
   "private": false,
   "license": "UNLICENSED",
@@ -24,7 +24,8 @@
     "@nestjs/common": "^9.0.0",
     "@nestjs/core": "^9.0.0",
     "@nestjs/platform-express": "^9.0.0",
-    "puppeteer": "^19.2.2",
+    "axios": "1.2.0-alpha.1",
+    "cheerio": "^1.0.0-rc.12",
     "reflect-metadata": "^0.1.13",
     "rimraf": "^3.0.2",
     "rxjs": "^7.2.0"
