@@ -40,12 +40,13 @@ export class AppService {
       );
       var setInfo = JSON.parse('[' + body.match(regexSetInfo)[1] + ']');
       
-      Logger.log(avgprice);
+      Logger.log(setInfo);
 
       //TODO: scrap extras ids for better accuracy of users in search for prices
       cardData.push({
         img: `//repositorio.sbrauble.com/arquivos/up/ed_mtg/${setInfo[3].toUpperCase()}_R.gif`,
         edition: $.parseHTML(setInfo[5]).values().next().value.data,
+        cardEditionImg:setInfo[4],
         price: {
           low: {
             priceNormal: avgprice[setInfo[7]].precoMenor,
